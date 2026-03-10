@@ -1,0 +1,30 @@
+lzc-sdk-version: "0.1"
+name: Bitcoin Core
+package: cloud.lazycat.app.bitcoin-core
+version: 0.1.0
+description: Bitcoin Core full node (bitcoind)
+license: MIT
+homepage: https://github.com/bitcoin/bitcoin
+
+application:
+  background_task: true
+
+services:
+  bitcoind:
+    image: trampliu/lazycat-bitcoin:latest
+    container_name: bitcoind
+    restart: unless-stopped
+    command: >
+      -printtoconsole
+      -server=1
+      -datadir=/home/bitcoin/.bitcoin
+      -conf=/home/bitcoin/.bitcoin/bitcoin.conf
+    binds:
+      - /lzcapp/var/bitcoin:/home/bitcoin/.bitcoin
+    ports:
+      - 8333:8333
+    healthcheck:
+      test: ["CMD-SHELL", "bitcoin-cli -datadir=/home/bitcoin/.bitcoin -rpcwait getblockchaininfo >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10

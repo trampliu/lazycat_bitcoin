@@ -51,9 +51,8 @@ RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR
     && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true install -y --no-install-recommends \
     ca-certificates \
     tini \
-    libevent-2.1-7 \
-    libboost-system1.74.0 \
-    libboost-filesystem1.74.0 \
+    libevent-dev \
+    libboost-dev \
     libsqlite3-0 \
     libzmq5 \
     && rm -rf /var/lib/apt/lists/*

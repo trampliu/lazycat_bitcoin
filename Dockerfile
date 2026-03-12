@@ -3,13 +3,16 @@
 FROM debian:bookworm AS builder
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG APT_MIRROR=deb.debian.org
 ARG ENABLE_WALLET=ON
 ARG WITH_ZMQ=OFF
 ARG ENABLE_IPC=OFF
 ARG BUILD_TESTS=OFF
 ARG BUILD_BENCH=OFF
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true update \
+    && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true install -y --no-install-recommends \
     build-essential \
     cmake \
     pkgconf \
@@ -41,8 +44,11 @@ RUN cmake -B build \
 FROM debian:bookworm-slim AS runtime
 
 ARG DEBIAN_FRONTEND=noninteractive
+ARG APT_MIRROR=deb.debian.org
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR}|g" /etc/apt/sources.list.d/debian.sources \
+    && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true update \
+    && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true install -y --no-install-recommends \
     ca-certificates \
     tini \
     libevent-2.1-7 \
@@ -64,4 +70,4 @@ VOLUME ["/home/bitcoin/.bitcoin"]
 EXPOSE 8333 8332
 
 ENTRYPOINT ["/usr/bin/tini", "--", "bitcoind"]
-CMD ["-printtoconsole", "-server=1", "-datadir=/home/bitcoin/.bitcoin", "-conf=/home/bitcoin/.bitcoin/bitcoin.conf"]
+CMD ["-printtoconsole", "-server=1", "-datadir=/home/bitcoin/.bitcoin"]

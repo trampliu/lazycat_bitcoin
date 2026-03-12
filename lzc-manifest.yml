@@ -14,7 +14,7 @@ application:
 
 services:
   bitcoind:
-    image: trampliu/lazycat-bitcoin:latest
+    image: registry.lazycat.cloud/u88175749/hassonleo/lazycat-bitcoin:5f68439b0e3ae27e
     container_name: bitcoind
     restart: unless-stopped
     command: >

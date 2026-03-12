@@ -62,7 +62,8 @@ RUN useradd -m -u 1000 -s /usr/sbin/nologin bitcoin
 
 COPY --from=builder /opt/bitcoin /opt/bitcoin
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh
 ENV PATH="/opt/bitcoin/bin:${PATH}"
 
 WORKDIR /home/bitcoin
@@ -70,5 +71,5 @@ VOLUME ["/home/bitcoin/.bitcoin"]
 
 EXPOSE 8333 8332
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/sh", "/usr/local/bin/docker-entrypoint.sh"]
 CMD ["-printtoconsole", "-server=1", "-datadir=/home/bitcoin/.bitcoin"]

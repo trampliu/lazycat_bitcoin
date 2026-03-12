@@ -50,6 +50,7 @@ RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR
     && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true update \
     && apt-get -o Acquire::Retries=5 -o Acquire::ForceIPv4=true install -y --no-install-recommends \
     ca-certificates \
+    gosu \
     tini \
     libevent-dev \
     libboost-dev \
@@ -60,13 +61,14 @@ RUN sed -i "s|deb.debian.org|${APT_MIRROR}|g; s|security.debian.org|${APT_MIRROR
 RUN useradd -m -u 1000 -s /usr/sbin/nologin bitcoin
 
 COPY --from=builder /opt/bitcoin /opt/bitcoin
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 ENV PATH="/opt/bitcoin/bin:${PATH}"
 
-USER bitcoin
 WORKDIR /home/bitcoin
 VOLUME ["/home/bitcoin/.bitcoin"]
 
 EXPOSE 8333 8332
 
-ENTRYPOINT ["/usr/bin/tini", "--", "bitcoind"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/usr/local/bin/docker-entrypoint.sh"]
 CMD ["-printtoconsole", "-server=1", "-datadir=/home/bitcoin/.bitcoin"]
